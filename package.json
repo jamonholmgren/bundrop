@@ -4,7 +4,7 @@
   "module": "index.ts",
   "type": "module",
   "bin": {
-    "bundrop": "index.ts"
+    "bundrop": "./bundrop"
   },
   "author": "Jamon Holmgren <git@jamon.dev>",
   "website": "https://github.com/jamonholmgren/bundrop",
