@@ -7,10 +7,15 @@ Requirements: Bun.
 ## Usage
 
 ```bash
-bunx bundrop ./file.zip -p 9999
+# Simplest usage
+bunx bundrop ./file.zip
+# Create a cloudflare tunnel so you can share the file with someone
+bunx bundrop --tunnel ./file.zip
+# Full options
+bunx bundrop --port 9876 --tunnel --debug ./file.zip
 ```
 
-You'll need to forward the port to the outside world if you want to share it with someone. One option is to use [ngrok](https://ngrok.com/) or [caddy](https://caddyserver.com/) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/).
+You'll need a CloudFlare account and `cloudflared` CLI installed to use the temporary tunnel. [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/).
 
 ### CloudFlare Tunnel setup (macOS)
 
@@ -19,8 +24,14 @@ You'll need to forward the port to the outside world if you want to share it wit
 brew install cloudflared
 # login to cloudflare
 cloudflared tunnel login
-# create a quick temporary tunnel
+# create a quick temporary tunnel (bundrop will do this for you if you specify --tunnel)
 cloudflared tunnel --url http://localhost:9999
 ```
 
 This will give you a URL like https://temperature-statutes-boulders-shots.trycloudflare.com/. Send this to the person you want to share the file with.
+
+You can also create a permanent tunnel. See the [Cloudflare Tunnel documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/) for more details.
+
+## License
+
+MIT
