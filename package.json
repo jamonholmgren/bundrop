@@ -10,6 +10,10 @@
   "website": "https://github.com/jamonholmgren/bundrop",
   "license": "MIT",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/qrcode": "^1.5.5"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }
