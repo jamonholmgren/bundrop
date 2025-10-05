@@ -4,11 +4,11 @@
     "": {
       "name": "bundrop",
       "dependencies": {
-        "@types/qrcode": "^1.5.5",
         "qrcode": "^1.5.4",
       },
       "devDependencies": {
         "@types/bun": "latest",
+        "@types/qrcode": "^1.5.5",
       },
     },
   },
