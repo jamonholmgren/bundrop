@@ -11,5 +11,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bun": "latest"
+  },
+  "dependencies": {
+    "@types/qrcode": "^1.5.5",
+    "qrcode": "^1.5.4"
   }
 }
