@@ -102,6 +102,7 @@ if (filePath === "version") {
 }
 
 const fileName = path.basename(filePath);
+const urlPath = Math.random().toString(36).substring(2, 7);
 let fileSize: number;
 
 try {
@@ -288,6 +289,7 @@ async function runCloudFlaredTunnel(
 async function setupCloudFlareTunnel(
   port: number,
   fileName: string,
+  urlPath: string,
   debug: boolean,
   autoTunnel: boolean
 ) {
@@ -313,7 +315,7 @@ async function setupCloudFlareTunnel(
 
   if (tunnelUrl) {
     console.log(`
-${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${fileName}${RESET}
+${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${urlPath}${RESET}
 
 ${DKGRAY}Share this URL with others to let them download your file!${RESET}
 `);
@@ -350,7 +352,7 @@ const server = Bun.serve({
 
     logRequest(ip, ua);
 
-    if (url.pathname === `/${fileName}`) {
+    if (url.pathname === `/${urlPath}`) {
       const file = Bun.file(filePath);
       return new Response(file, {
         headers: {
@@ -361,13 +363,18 @@ const server = Bun.serve({
       });
     }
 
-    return new Response(`Use: /${fileName}\n`, { status: 404 });
+    return new Response(
+      "Hi there! Looks like you landed on the main page.\nTo get your file, just make sure to use the special link we gave you.\n",
+      { status: 404 }
+    );
   },
 });
 
 console.log(
-  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${fileName}${RESET}\n`
+  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${urlPath}${RESET}\n`
 );
 
 // Start CloudFlare tunnel onboarding
-setupCloudFlareTunnel(port, fileName, debug, autoTunnel).catch(console.error);
+setupCloudFlareTunnel(port, fileName, urlPath, debug, autoTunnel).catch(
+  console.error
+);
