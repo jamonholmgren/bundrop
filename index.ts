@@ -313,7 +313,7 @@ async function setupCloudFlareTunnel(
 
   if (tunnelUrl) {
     console.log(`
-${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${fileName}${RESET}
+${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${encodeURIComponent(fileName)}${RESET}
 
 ${DKGRAY}Share this URL with others to let them download your file!${RESET}
 `);
@@ -350,7 +350,10 @@ const server = Bun.serve({
 
     logRequest(ip, ua);
 
-    if (url.pathname === `/${fileName}`) {
+    // Decode the pathname to handle URL-encoded special characters
+    const decodedPathname = decodeURIComponent(url.pathname);
+
+    if (decodedPathname === `/${fileName}`) {
       const file = Bun.file(filePath);
       return new Response(file, {
         headers: {
@@ -366,7 +369,7 @@ const server = Bun.serve({
 });
 
 console.log(
-  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${fileName}${RESET}\n`
+  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${encodeURIComponent(fileName)}${RESET}\n`
 );
 
 // Start CloudFlare tunnel onboarding
