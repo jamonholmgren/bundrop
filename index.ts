@@ -103,6 +103,7 @@ if (filePath === "version") {
 }
 
 const fileName = path.basename(filePath);
+const urlPath = Math.random().toString(36).substring(2, 7);
 let fileSize: number;
 
 try {
@@ -289,6 +290,7 @@ async function runCloudFlaredTunnel(
 async function setupCloudFlareTunnel(
   port: number,
   fileName: string,
+  urlPath: string,
   debug: boolean,
   autoTunnel: boolean
 ) {
@@ -314,7 +316,7 @@ async function setupCloudFlareTunnel(
 
   if (tunnelUrl) {
     console.log(`
-${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${fileName}${RESET}
+${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${urlPath}${RESET}
 
 ${DKGRAY}Share this URL or scan the QR code to let them download your file!${RESET}
 `);
@@ -344,7 +346,7 @@ function logRequest(ip: string, ua: string) {
 
   const shortUA = ua.slice(0, 60).replace(/\s+/g, " ");
   console.log(
-    `[${new Date().toISOString()}] ${ip} (${shortUA}) → connection #${
+    `[${new Date().toISOString()}] ${ip.toString()} (${shortUA}) → connection #${
       info.count
     }`
   );
@@ -360,7 +362,8 @@ const server = Bun.serve({
 
     logRequest(ip, ua);
 
-    if (url.pathname === `/${fileName}`) {
+    // Download route for actual file
+    if (url.pathname === `/download/${urlPath}`) {
       const file = Bun.file(filePath);
       return new Response(file, {
         headers: {
@@ -371,13 +374,140 @@ const server = Bun.serve({
       });
     }
 
-    return new Response(`Use: /${fileName}\n`, { status: 404 });
+    // Main page with download interface
+    if (url.pathname === `/${urlPath}`) {
+      const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+      const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download ${fileName}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .file-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 32px;
+            color: white;
+        }
+        
+        .file-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+        
+        .file-size {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 30px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .footer {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="file-icon">📁</div>
+        <div class="file-name">${fileName}</div>
+        <div class="file-size">${fileSizeMB} MB</div>
+        <a href="/download/${urlPath}" class="download-btn">Download File</a>
+        <div class="footer">
+            Powered by <a href="https://github.com/jamonholmgren/bundrop" target="_blank">bundrop</a>
+        </div>
+    </div>
+</body>
+</html>`;
+
+      return new Response(html, {
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
+    }
+
+    return new Response(
+      "Hi there! Looks like you landed on the main page.\nTo get your file, just make sure to use the special link we gave you.\n",
+      { status: 404 }
+    );
   },
 });
 
 console.log(
-  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${fileName}${RESET}\n`
+  `\n${GREEN}Serving ${fileName} on ${CYAN}http://localhost:${port}/${urlPath}${RESET}\n`
 );
 
 // Start CloudFlare tunnel onboarding
-setupCloudFlareTunnel(port, fileName, debug, autoTunnel).catch(console.error);
+setupCloudFlareTunnel(port, fileName, urlPath, debug, autoTunnel).catch(
+  console.error
+);
