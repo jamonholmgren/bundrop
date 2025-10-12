@@ -1,6 +1,7 @@
 import { statSync, readFileSync } from "fs";
 import path from "path";
 import { createInterface } from "readline";
+import qrcode from "qrcode";
 
 // ANSI color codes
 const GREEN = "\x1b[32m";
@@ -317,8 +318,17 @@ async function setupCloudFlareTunnel(
     console.log(`
 ${GREEN}Your file is now accessible at:\n\n${CYAN}${tunnelUrl}/${urlPath}${RESET}
 
-${DKGRAY}Share this URL with others to let them download your file!${RESET}
+${DKGRAY}Share this URL or scan the QR code to let them download your file!${RESET}
 `);
+
+    qrcode.toString(
+      tunnelUrl,
+      { type: "terminal", small: true },
+      (err, url) => {
+        if (err) console.error(err);
+        console.log(url);
+      }
+    );
   }
 }
 
